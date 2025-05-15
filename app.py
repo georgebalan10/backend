@@ -41,6 +41,10 @@ app.config['MAIL_PASSWORD'] = 'znmbjslwrupycdyh'        # parola generată aplic
 mail = Mail(app)
 db.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
+
 #config poze
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 if not os.path.exists(UPLOAD_FOLDER):
