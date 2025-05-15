@@ -443,9 +443,8 @@ def reset_ai_questions():
         f.write('')
     return jsonify({'message': 'Fișierul a fost golit!'}), 200
 
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
+#if __name__ == "__main__":
+with app.app_context():
+   db.create_all()
         # build_index()  # <-- corectat cu spații
-    app.run(debug=True)
 
