@@ -23,8 +23,11 @@ CORS(app)
 load_dotenv()
 
 # Configurare bază de date
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/database.db'
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = False
+
 
 DATABASE = os.path.join('instance', 'database.db')
 
@@ -446,7 +449,7 @@ def reset_ai_questions():
     return jsonify({'message': 'Fișierul a fost golit!'}), 200
 
 #if __name__ == "__main__":
-with app.app_context():
-   db.create_all()
+#with app.app_context():
+  # db.create_all()
         # build_index()  # <-- corectat cu spații
 
