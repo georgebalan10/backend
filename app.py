@@ -24,7 +24,7 @@ load_dotenv()
 
 # Configurare bază de date
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://acupunctura_db_user:3B8jHD4Sc4Xb5Xie3LOsdUU59QDQxhYI@dpg-d0j1v32i9vc73beju20-a.frankfurt-postgres.render.com:5432/acupunctura_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 
@@ -448,9 +448,9 @@ def reset_ai_questions():
         f.write('')
     return jsonify({'message': 'Fișierul a fost golit!'}), 200
 
-#if __name__ == "__main__":
-with app.app_context():
-    db.create_all()
-
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
         # build_index()  # <-- corectat cu spații
 
