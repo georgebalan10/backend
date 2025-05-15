@@ -1,0 +1,12 @@
+databases:
+  - name: acupunctura_db
+
+services:
+  - type: web
+    name: backend-acupunctura
+    env: python
+    buildCommand: \"\"
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://acupunctura_db_user:3B8jHD4Sc4Xb5Xie3LOSdUU59QDQxhYI@dpg-d0j1v32li9vc73beju20-a/acupunctura_db
