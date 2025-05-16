@@ -434,7 +434,7 @@ def ai_question_stats():
         db.func.count(AIQuestion.text).label('count')
     ).group_by(AIQuestion.text).order_by(db.desc('count')).limit(10).all()
 
-    top_10 = [{'question': r.text, 'count': r.count} for r in results]
+    top_10 = [{'question': r.text, 'count': int(r.count)} for r in results]  # 🔧 AICI
     return jsonify({'stats': top_10})
 
 @app.route('/api/admin/rebuild-index', methods=['POST'])
