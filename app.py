@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_mail import Mail, Message
-from models import db, User, Appointment, Review, Upload
+from models import db, User, Appointment, Review, Upload,AIQuestion
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
@@ -404,14 +404,17 @@ def get_appointments_full(user_id):
 def chatbot():
     data = request.get_json()
     user_message = data.get('message', '').strip()
+    user_id = data.get('user_id')  # Asigură-te că frontend-ul trimite și user_id!
 
     if not user_message:
         return jsonify({'reply': 'Nu am înțeles întrebarea ta.'})
 
-    # Salvăm întrebarea în fișier text
-    with open('ai_questions_log.txt', 'a', encoding='utf-8') as f:
-        f.write(user_message.strip() + '\n')
+    # Salvăm întrebarea în baza de date
+    new_question = AIQuestion(user_id=user_id, text=user_message)
+    db.session.add(new_question)
+    db.session.commit()
 
+    # Căutăm răspuns cu Whoosh
     ix = index.open_dir("indexdir")
     with ix.searcher() as searcher:
         parser = QueryParser("content", ix.schema, group=OrGroup.factory(0.9))
@@ -426,17 +429,13 @@ def chatbot():
 
 @app.route('/api/admin/ai-question-stats', methods=['GET'])
 def ai_question_stats():
-    try:
-        with open('ai_questions_log.txt', 'r', encoding='utf-8') as f:
-            questions = [line.strip() for line in f.readlines() if line.strip()]
+    results = db.session.query(
+        AIQuestion.text,
+        db.func.count(AIQuestion.text).label('count')
+    ).group_by(AIQuestion.text).order_by(db.desc('count')).limit(10).all()
 
-        count = Counter(questions)
-        top_10 = count.most_common(10)
-
-        result = [{'question': q, 'count': c} for q, c in top_10]
-        return jsonify({'stats': result}), 200
-    except FileNotFoundError:
-        return jsonify({'stats': []}), 200
+    top_10 = [{'question': r.text, 'count': r.count} for r in results]
+    return jsonify({'stats': top_10})
 
 @app.route('/api/admin/rebuild-index', methods=['POST'])
 def rebuild_index():
@@ -448,9 +447,9 @@ def rebuild_index():
 
 @app.route('/api/admin/reset-ai-questions', methods=['POST'])
 def reset_ai_questions():
-    with open('ai_questions_log.txt', 'w', encoding='utf-8') as f:
-        f.write('')
-    return jsonify({'message': 'Fișierul a fost golit!'}), 200
+    AIQuestion.query.delete()
+    db.session.commit()
+    return jsonify({'message': 'Toate întrebările au fost șterse!'}), 200
 
 if __name__ == "__main__":
     with app.app_context():

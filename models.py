@@ -36,3 +36,11 @@ class Upload(db.Model):
     filename = db.Column(db.String(255))
     description = db.Column(db.String(255))
     user = db.relationship('User', backref=db.backref('uploads', lazy=True))
+
+class AIQuestion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    text = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+
